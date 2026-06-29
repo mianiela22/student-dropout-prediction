@@ -23,15 +23,18 @@ The [UCI Predict Students' Dropout and Academic Success](https://archive.ics.uci
 ## Approach
 
 1. **Exploratory Data Analysis** — understanding feature distributions, class imbalance, and which variables correlate with dropout
-2. **Preprocessing** — feature scaling, encoding, and handling the ~39/61 class split
+2. **Preprocessing** — binary target (dropping "Enrolled" students whose outcome is unknown), feature scaling, and handling the ~39/61 class split
 3. **Modeling** — comparing Logistic Regression, Random Forest, and XGBoost with proper cross-validation
-4. **Evaluation** — precision, recall, F1, AUC-ROC (not just accuracy), plus a confusion matrix
+4. **Evaluation** — precision, recall, F1, AUC-ROC (not just accuracy), plus confusion matrices
 5. **Interpretability** — SHAP values to explain which factors drive dropout risk
-6. **Business framing** — translating model output into actionable recommendations for an advising team
+6. **Temporal analysis** — testing what the model can predict at enrollment, after semester 1, and after semester 2, to determine the realistic intervention window
+7. **Business framing** — translating model output into actionable recommendations for an advising team
 
 ## Results
 
-All three models achieve strong performance (AUC > 0.96), with **Logistic Regression** slightly outperforming the ensemble methods — evidence that the relationship between features and dropout is largely linear.
+### Model Comparison (full feature set)
+
+All three models achieve strong performance (AUC > 0.96), with **Logistic Regression** slightly outperforming the ensemble methods — evidence that the relationship between features and dropout is largely linear, so added model complexity doesn't help.
 
 | Model | Accuracy | F1 (Dropout) | AUC-ROC | Recall | Precision |
 |-------|----------|-------------|---------|--------|-----------|
@@ -39,7 +42,17 @@ All three models achieve strong performance (AUC > 0.96), with **Logistic Regres
 | Random Forest | 0.923 | 0.902 | 0.972 | 0.905 | 0.899 |
 | XGBoost | 0.916 | 0.894 | 0.967 | 0.901 | 0.886 |
 
-**Key finding:** The model catches **94% of at-risk students** (recall), meaning for a cohort of 1,000 students, it would correctly flag ~366 of the ~390 who would otherwise drop out — early enough for an advising team to intervene.
+### When Can We Actually Intervene?
+
+The full model's 0.97 AUC is partly driven by second-semester features that describe dropout *as it's happening* (a student with 0 approved courses in semester 2 is already most of the way out). The more important question is: **how early can we flag at-risk students?**
+
+| Intervention Point | Features | AUC-ROC | Recall | Precision |
+|---|---|---|---|---|
+| At enrollment | 21 (demographics, background) | 0.824 | 0.736 | 0.661 |
+| **After semester 1** | **27 (+ semester 1 grades)** | **0.948** | **0.891** | **0.843** |
+| After semester 2 | 36 (all features) | 0.973 | 0.937 | 0.881 |
+
+**The semester-1 model is the practically useful one** — it achieves AUC 0.948 using only data available between semesters, when there's still time to intervene. It catches **89% of at-risk students** before semester 2 even begins.
 
 ### Top Predictors of Dropout (via SHAP)
 
@@ -47,14 +60,14 @@ All three models achieve strong performance (AUC > 0.96), with **Logistic Regres
 |---------|-----------|
 | Curricular units approved (sem 1 & 2) | Fewer approved → higher dropout risk |
 | Tuition fees up to date | Not current → higher dropout risk |
-| Curricular units enrolled (sem 2) | Fewer enrolled → higher dropout risk |
+| Curricular units enrolled | Fewer enrolled → higher dropout risk |
 | Scholarship holder | No scholarship → higher dropout risk |
 | Semester grades | Lower grades → higher dropout risk |
 
 The strongest signals are **first-semester academic performance** and **financial standing** — both actionable intervention points for universities.
 
 <p align="center">
-  <img src="figures/05_model_comparison.png" width="90%" alt="Model comparison: ROC curves and confusion matrices" />
+  <img src="figures/08_temporal_comparison.png" width="90%" alt="Temporal model comparison: ROC curves and metrics by intervention timing" />
 </p>
 
 ## Interactive Demo
