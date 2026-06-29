@@ -72,7 +72,7 @@ The strongest signals are **first-semester academic performance** and **financia
 
 ## Interactive Demo
 
-A Streamlit app lets you input a student's profile and get a real-time dropout risk prediction with explanations.
+A Streamlit app lets you input a student's profile and get a real-time dropout risk prediction with SHAP explanations. Users can toggle between the **early-warning model** (semester 1 data only — the actionable one) and the **full model** (all semesters — higher accuracy but partly retrospective), demonstrating the accuracy vs. actionability tradeoff.
 
 ```bash
 streamlit run app.py
