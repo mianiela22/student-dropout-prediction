@@ -1,5 +1,7 @@
 # Student Dropout Prediction
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://student-dropout-prediction-mianiela22.streamlit.app)
+
 Predicting which university students are at risk of dropping out using machine learning, so institutions can intervene early and improve retention.
 
 ## The Problem
